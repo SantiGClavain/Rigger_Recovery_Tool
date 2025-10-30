@@ -58,3 +58,5 @@ global proc GetBakedObjects(string $bakeSet)
 // Llamada ejemplo (si ejecutas el script completo):
 GetBakedObjects($bakeSetName);
 
+// Local Change to commit
+
