@@ -1,0 +1,29 @@
+# Visual Studio / Editor
+.vscode/
+.idea/
+*.suo
+*.user
+
+# System
+Thumbs.db
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+
+# Node
+node_modules/
+
+# Build
+bin/
+obj/
+
+# Maya temp
+*.ma
+*.mb
+*.iff
+*.map
+
+# OneDrive metadata
+~$*

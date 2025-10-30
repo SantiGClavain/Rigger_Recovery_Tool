@@ -1,0 +1,60 @@
+
+// Minimal Rigger Recovery Tool - funcional
+
+// Nombre del set usado por la herramienta
+string $bakeSetName = "Bake_set";
+if ($bakeSetName == "")
+{
+	error "Bake set name is empty - aborting.\n";
+}
+if (!`objExists $bakeSetName`) sets -empty -name $bakeSetName;
+
+// Procedimiento principal: recorre la selección y añade al set los objetos
+// que tengan animCurves conectadas a cualquier atributo keyable.
+global proc GetBakedObjects(string $bakeSet)
+{
+	string $sel[] = `ls -sl`;
+	if (size($sel) == 0)
+	{
+		warning "No objects selected.";
+		return;
+	}
+
+	// Guardar selección original
+	string $origSel[] = $sel;
+
+	// Asegurar existencia del set
+	if (!`objExists $bakeSet`) sets -empty -name $bakeSet;
+
+	string $obj;
+	int $i;
+	string $attrs[];
+	string $conns[];
+
+	for ($obj in $sel)
+	{
+		if (!`objExists $obj`) continue;
+		$attrs = `listAttr -keyable $obj`;
+		if (size($attrs) == 0) continue;
+
+		for ($i = 0; $i < size($attrs); $i++)
+		{
+			string $attr = $attrs[$i];
+			string $fullAttr = ($obj + "." + $attr);
+			$conns = `listConnections -source true -destination false -type animCurve $fullAttr`;
+			if (size($conns) > 0)
+			{
+				select -r $obj;
+				sets -add $bakeSet;
+				break;
+			}
+		}
+	}
+
+	// Restaurar selección original
+	if (size($origSel) > 0) select -r $origSel; else select -cl;
+}
+
+// Llamada ejemplo (si ejecutas el script completo):
+GetBakedObjects($bakeSetName);
+

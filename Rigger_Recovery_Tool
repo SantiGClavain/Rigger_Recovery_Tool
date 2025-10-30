@@ -1,0 +1,56 @@
+{
+// snippet: crear un set llamado Bake_set si no existe
+if (!`objExists "Bake_set"`) sets -empty -name "Bake_set";
+else print "Bake_set already exists\n";
+
+// Procedimiento: GetBakedObjects
+// Recorre la selección; para cada objeto comprueba sus atributos keyables
+// y si encuentra alguno con keyframes añade el objeto al set "Bake_set".
+global proc GetBakedObjects()
+{
+	string $sel[] = `ls -sl`;
+	if (size($sel) == 0)
+	{
+		warning "No objects selected. Select objects to evaluate for baked keys.";
+		return;
+	}
+
+	// Asegurarse de que Bake_set exista
+	if (!`objExists "Bake_set"`) sets -empty -name "Bake_set";
+
+	// Iterar objetos seleccionados
+	for ($obj in $sel)
+	{
+		// Obtener atributos keyables del objeto
+		string $attrs[] = `listAttr -keyable true $obj`;
+		int $found = 0;
+
+		// Si no hay atributos keyables, pasar al siguiente objeto
+		if (size($attrs) == 0) continue;
+
+		// Comprobar cada atributo para detectar keyframes
+		for ($i = 0; $i < size($attrs); $i++)
+		{
+			string $attr = $attrs[$i];
+			// Construir nombre completo del atributo
+			string $fullAttr = ($obj + "." + $attr);
+
+			// Query de keyframes: si hay alguna key, keyframe -q -name devolverá un array no vacío
+			string $k[] = `keyframe -q -name $fullAttr`;
+			if (size($k) > 0)
+			{
+				// Añadir el objeto al set y parar la comprobación de sus atributos
+				sets -add $obj "Bake_set";
+				print ($obj + " added to Bake_set (attr: " + $attr + ")\n");
+				$found = 1;
+				break;
+			}
+		}
+
+		// seguir con el siguiente objeto (aunque el break del inner ya hace esto)
+		if ($found) continue;
+	}
+}
+
+}
+
